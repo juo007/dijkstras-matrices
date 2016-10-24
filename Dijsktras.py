@@ -20,11 +20,13 @@ def minNode(list,visited):
 	newList.sort(key=lambda tup:tup[0])
 	return newList[0][1]
 
-def func1(matrix, target):
+def func1(Matrix, target):
 
 	solution = []
-	numNodes = len(matrix[0])
+	numNodes = len(Matrix[0])
 	visited = set()
+
+	matrix = map(list,zip(*Matrix))
 	
 	#initialize solution array to inifinity
 	for x in range(numNodes):
@@ -41,7 +43,6 @@ def func1(matrix, target):
 	
 	frontierNode = minNode(matrix[target],visited)
 	
-	#while len(visited) < numNodes:
 	while frontierNode:
 		for node in range(numNodes):
 			weight = matrix[frontierNode][node]
@@ -53,11 +54,13 @@ def func1(matrix, target):
 		
 	return solution
 					
-def func2(matrix,target):
-	numNodes = len(matrix[0])
+def func2(Matrix,target):
+	numNodes = len(Matrix[0])
 	paths = []
 	solution = []
 	graph = {}
+	
+	matrix = map(list,zip(*Matrix))
 	
 	for x in range(numNodes):
 		path = []
@@ -73,11 +76,11 @@ def func2(matrix,target):
 			cost = 0
 			for p in range(len(path)-1):
 				cost+= matrix[path[p]][path[p+1]]
-			if len(path) is 0:
+			if len(path) is 1:
 				cost = matrix[0][0]
 			costs.append(cost)
-		
-		solution.append(min(costs))
+		if costs:
+			solution.append(min(costs))
 		
 	return solution		
 	
@@ -99,12 +102,12 @@ def find_all_paths(graph, target, end, path=[]):
 def func3(matrix, solution, target, othernode):
 	path = []
 	numNodes = len(matrix[0])
-	path.append(othernode)
+	path.append(target)
 	
 	while(othernode is not target):
 		cost = []
 		for node in range(numNodes):
-			weight = matrix[othernode][node]
+			weight = matrix[target][node]
 			if weight > 0:
 				tuple = (node,weight+solution[node])
 				cost.append(tuple)
@@ -127,7 +130,8 @@ if __name__ == "__main__":
 				Matrix[x][y] = randint(0,5)
 	
 	print Matrix
-	
+	#newMatrix = map(list,zip(*Matrix))
+	#print newMatrix
 	'''Matrix[0] = [0, 4, 0, 0, 0, 0, 0, 8, 0]
 	Matrix[1] = [4, 0, 8, 0, 0, 0, 0, 11 ,0]
 	Matrix[2] = [0, 8, 0, 7, 0, 4, 0, 0, 2]
@@ -140,14 +144,13 @@ if __name__ == "__main__":
 	
 	solution = func1(Matrix,0)	
 
-	solution2 = func2(Matrix,0)	
-	
-	#path = func3(Matrix,solution2,0,7)
-
-	
+	solution2 = func2(Matrix,0)
 	print solution
-	print solution2
-	#print path	
+	print solution2	
+	
+	path = func3(Matrix,solution,0,7)
+	
+	print path	
 	
 		
 	
