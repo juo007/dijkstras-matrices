@@ -16,6 +16,9 @@ def minNode(list,visited):
 		if list[x] > 0:
 			tup = (list[x],x)
 			newList.append(tup)
+			
+	if not newList:
+		return
 
 	newList.sort(key=lambda tup:tup[0])
 	return newList[0][1]
@@ -29,7 +32,7 @@ def func1(Matrix, target):
 	numNodes = len(Matrix[0])
 	visited = set()
 
-	#Need to transpose matrix to get OUTGOING
+	#Need to transpose matrix to get INCOMING edges
 	matrix = map(list,zip(*Matrix))
 	
 	#initialize solution array to inifinity
@@ -43,13 +46,13 @@ def func1(Matrix, target):
 	#initialize
 	for node in range(numNodes):
 		weight = matrix[target][node]
-		if weight > 0 and weight < solution[node]:
+		if weight > 0:
 			solution[node] = weight;
-	
+
 	frontierNode = minNode(matrix[target],visited)
 	
 	#loop through each node and check for a smaller path
-	while frontierNode:
+	while frontierNode is not target and frontierNode is not None:
 		for node in range(numNodes):
 			weight = matrix[frontierNode][node]
 			if weight > 0 and node not in visited and weight + solution[frontierNode] < solution[node]:
@@ -83,20 +86,21 @@ def func2(Matrix,target):
 	#compute the costs of each path. Take the minimum
 	#cost and append it to our solution
 	for node in range(numNodes):
-		paths = find_all_paths(graph,target,node)		
+		paths = find_all_paths(graph,target,node)	
 		costs = []
 		for path in paths:
 			cost = 0
 			for p in range(len(path)-1):
 				cost+= matrix[path[p]][path[p+1]]
 			if len(path) is 1:
-				cost = matrix[0][0]
+				cost = matrix[target][target]
 			costs.append(cost)
 		if costs:
 			solution.append(min(costs))
 		
 	return solution		
 	
+#Recursive function that will find all paths
 def find_all_paths(graph, target, end, path=[]):
 	path = path + [target]
 	if target == end:
@@ -112,6 +116,10 @@ def find_all_paths(graph, target, end, path=[]):
 				
 	return paths
 	
+#Given a matrix, its solution vector with all the shortest
+#paths to the target, and another node that is NOT the target
+#This function will produce the path of the shortest function
+#Uses the information of its neighbors to calculate
 def func3(matrix, solution, target, othernode):
 	path = []
 	numNodes = len(matrix[0])
@@ -119,19 +127,23 @@ def func3(matrix, solution, target, othernode):
 	visited = set()
 	visited.add(othernode)
 	
+	#loop through each neighbor and pick the cost that is the least
+	#cost where the cost includes both the weight to the neighbor 
+	#and the neighbor's distance to the target
 	while(othernode is not target):
 		cost = []
 		for node in range(numNodes):
 			weight = matrix[othernode][node]
 			if weight > 0 and node not in visited:
 				if node is target:
+					#Need to check if the case is the target
+					#If so, we should not add the cost to itself
 					tuple= (node,weight)
 				else:
 					tuple = (node,weight+solution[node])
 				cost.append(tuple)
 		
 		cost.sort(key=lambda tuple:tuple[1])
-		print "cost ", cost
 		path.append(cost[0][0])
 		visited.add(cost[0][0])
 		othernode = (cost[0][0])
@@ -140,6 +152,7 @@ def func3(matrix, solution, target, othernode):
 
 if __name__ == "__main__":
 	from random import randint
+	import timeit
 	
 	N = 8
 	Matrix = [[0 for x in range(N)] for y in range(N)]
@@ -148,29 +161,26 @@ if __name__ == "__main__":
 		for y in range(N):
 			if randint(0,9) < 7:
 				Matrix[x][y] = randint(0,5)
-
-	
 	#print Matrix
-	#newMatrix = map(list,zip(*Matrix))
-	#print newMatrix
-	'''Matrix[0] = [5, 4, 0, 5, 0, 3, 1, 2]
-	Matrix[1] = [0, 0, 4, 3, 0, 4, 3, 0]
-	Matrix[2] = [0, 0, 3, 3, 2, 0, 0, 1]
-	Matrix[3] = [1, 1, 0, 3, 4, 0, 0, 0]
-	Matrix[4] = [0, 0, 4, 0, 0, 0, 0, 0]
-	Matrix[5] = [1, 5, 1, 2, 0, 3, 4, 2]
-	Matrix[6] = [2, 4, 4, 4, 0, 0, 1, 2]
-	Matrix[7] = [3, 1, 2, 0, 4, 0, 4, 0]'''
 	
-	
-	solution = func1(Matrix,0)	
 
+	#start_time = timeit.default_timer()
+	solution = func1(Matrix,0)
+	#elapsed = timeit.default_timer() - start_time
+	#print(elapsed)
+
+	#start_time2 = timeit.default_timer()
 	solution2 = func2(Matrix,0)
+	#elapsed2 = timeit.default_timer() - start_time2
+	#print(elapsed2)
+	
+	print "===solution for func1==="
 	print solution
+	print "===solution for func2==="
 	print solution2	
 	
-	path = func3(Matrix,solution2,0,6)
-	
+	path = func3(Matrix,solution,1,N-1)
+	print "===solution for func3==="
 	print path	
 	
 		
