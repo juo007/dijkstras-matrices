@@ -20,12 +20,16 @@ def minNode(list,visited):
 	newList.sort(key=lambda tup:tup[0])
 	return newList[0][1]
 
+'''Dijsktra's with a given 2-D Matrix with weight values
+	This will return a vector of the shortest path to the 
+	target from every other node'''
 def func1(Matrix, target):
 
 	solution = []
 	numNodes = len(Matrix[0])
 	visited = set()
 
+	#Need to transpose matrix to get OUTGOING
 	matrix = map(list,zip(*Matrix))
 	
 	#initialize solution array to inifinity
@@ -36,6 +40,7 @@ def func1(Matrix, target):
 	visited.add(target)
 	solution[target] = matrix[target][target]
 	
+	#initialize
 	for node in range(numNodes):
 		weight = matrix[target][node]
 		if weight > 0 and weight < solution[node]:
@@ -43,6 +48,7 @@ def func1(Matrix, target):
 	
 	frontierNode = minNode(matrix[target],visited)
 	
+	#loop through each node and check for a smaller path
 	while frontierNode:
 		for node in range(numNodes):
 			weight = matrix[frontierNode][node]
@@ -53,22 +59,29 @@ def func1(Matrix, target):
 		frontierNode = minNode(solution,visited)
 		
 	return solution
-					
+				
+#Lists out all the given paths 
+#Recursively calls a function that will get all the paths
+#between two nodes. Call iterarively on that recursive function				
 def func2(Matrix,target):
 	numNodes = len(Matrix[0])
 	paths = []
 	solution = []
 	graph = {}
 	
+	#Need to transpose matrix to get OUTGOING
 	matrix = map(list,zip(*Matrix))
 	
+	#Set up graph from matrix
 	for x in range(numNodes):
 		path = []
 		for y in range(numNodes):
 			if matrix[x][y] > 0:
 				path = path + [y]
 		graph[x] = path	
-
+	#Call recursive function for every end node, then
+	#compute the costs of each path. Take the minimum
+	#cost and append it to our solution
 	for node in range(numNodes):
 		paths = find_all_paths(graph,target,node)		
 		costs = []
@@ -102,45 +115,53 @@ def find_all_paths(graph, target, end, path=[]):
 def func3(matrix, solution, target, othernode):
 	path = []
 	numNodes = len(matrix[0])
-	path.append(target)
+	path.append(othernode)
+	visited = set()
+	visited.add(othernode)
 	
 	while(othernode is not target):
 		cost = []
 		for node in range(numNodes):
-			weight = matrix[target][node]
-			if weight > 0:
-				tuple = (node,weight+solution[node])
+			weight = matrix[othernode][node]
+			if weight > 0 and node not in visited:
+				if node is target:
+					tuple= (node,weight)
+				else:
+					tuple = (node,weight+solution[node])
 				cost.append(tuple)
 		
-		#print "cost ", cost
 		cost.sort(key=lambda tuple:tuple[1])
+		print "cost ", cost
 		path.append(cost[0][0])
+		visited.add(cost[0][0])
 		othernode = (cost[0][0])
-	
+		
 	return path	
 
 if __name__ == "__main__":
 	from random import randint
 	
-	Matrix = [[0 for x in range(8)] for y in range(8)]
+	N = 8
+	Matrix = [[0 for x in range(N)] for y in range(N)]
 	
-	for x in range(8):
-		for y in range(8):
+	for x in range(N):
+		for y in range(N):
 			if randint(0,9) < 7:
 				Matrix[x][y] = randint(0,5)
+
 	
-	print Matrix
+	#print Matrix
 	#newMatrix = map(list,zip(*Matrix))
 	#print newMatrix
-	'''Matrix[0] = [0, 4, 0, 0, 0, 0, 0, 8, 0]
-	Matrix[1] = [4, 0, 8, 0, 0, 0, 0, 11 ,0]
-	Matrix[2] = [0, 8, 0, 7, 0, 4, 0, 0, 2]
-	Matrix[3] = [0, 0, 7, 0, 9, 14, 0, 0, 0]
-	Matrix[4] = [0, 0, 0, 9, 0, 10, 0, 0, 0]
-	Matrix[5] = [0, 0, 4, 14, 10, 0, 2, 0, 0]
-	Matrix[6] = [0, 0, 0, 0, 0, 2, 0, 1, 6]
-	Matrix[7] = [8, 11, 0, 0, 0, 0, 1, 0, 7]
-	Matrix[8] = [0, 0, 2, 0, 0, 0, 6, 7, 0]'''
+	'''Matrix[0] = [5, 4, 0, 5, 0, 3, 1, 2]
+	Matrix[1] = [0, 0, 4, 3, 0, 4, 3, 0]
+	Matrix[2] = [0, 0, 3, 3, 2, 0, 0, 1]
+	Matrix[3] = [1, 1, 0, 3, 4, 0, 0, 0]
+	Matrix[4] = [0, 0, 4, 0, 0, 0, 0, 0]
+	Matrix[5] = [1, 5, 1, 2, 0, 3, 4, 2]
+	Matrix[6] = [2, 4, 4, 4, 0, 0, 1, 2]
+	Matrix[7] = [3, 1, 2, 0, 4, 0, 4, 0]'''
+	
 	
 	solution = func1(Matrix,0)	
 
@@ -148,7 +169,7 @@ if __name__ == "__main__":
 	print solution
 	print solution2	
 	
-	path = func3(Matrix,solution,0,7)
+	path = func3(Matrix,solution2,0,6)
 	
 	print path	
 	
